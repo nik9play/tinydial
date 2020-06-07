@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "tinyDial",
+  "version": "1.0",
+ 
+  "description": "Super simple new tab page with no extra options.",
+  "icons": {
+    "48": "icons/tinydial_icon.svg"
+  },
+
+  "applications": {
+    "gecko": {
+      "id": "tinydial@nik9"
+    }
+  },
+
+  "permissions": [
+    "<all_urls>",
+    "storage"
+  ],
+
+  "chrome_url_overrides" : {
+    "newtab": "index.html"
+  },
+  
+  "web_accessible_resources": ["*.js", "*.css"]
+}
