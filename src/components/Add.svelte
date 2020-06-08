@@ -1,28 +1,36 @@
 <div class="add">
-  <div class="btn">
+  <div class="btn" on:click={visibleToggle}>
     <svg viewBox="0 0 24 24">
       <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
     </svg>
   </div>
-
-  <div class="add_container" class:loading={loading}>
-    <label>URL</label>
-    <input bind:value={url} type="url" disabled={loading}>
-    <label>Name</label>
-    <input bind:value={name} type="text" disabled={loading}>
-    <button on:click={addElement} disabled={loading}>OK</button>
-  </div>
+  {#if visible}
+    <div class="add_container" class:loading={loading} transition:fly="{{ y: 50, duration: 300 }}">
+      <label>URL</label>
+      <input bind:value={url} type="url" disabled={loading}>
+      <label>Name</label>
+      <input bind:value={name} type="text" disabled={loading}>
+      <button on:click={addElement} disabled={loading}>OK</button>
+    </div>
+  {/if}
 </div>
 
 <script>
 let url
 let name
 let loading
+let visible = false
 
 import { createEventDispatcher } from 'svelte'
 import { urlToDataUrl, checkDark } from '../img-converter.js'
+import { fly } from 'svelte/transition'
 
 const dispatch = createEventDispatcher()
+
+function visibleToggle() {
+  if (visible) visible = false 
+  else visible = true;
+}
 
 async function addElement() {
   browser.storage.local.get("bookmarks").then(item => {
@@ -74,12 +82,6 @@ async function addElement() {
   position: fixed;
   right: 0;
   top: 0;
-
-  &:hover {
-    .add_container {
-      display: grid;
-    }
-  }
 }
 
 .add_container {
@@ -90,12 +92,10 @@ async function addElement() {
   display: grid;
   grid-gap: .5rem;
   margin: 3rem 1rem;
-  display: none;
 }
 
 .loading {
   cursor: wait;
-  display: grid;
 }
 
 input {
