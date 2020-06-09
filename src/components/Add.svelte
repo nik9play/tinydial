@@ -10,6 +10,10 @@
       <input bind:value={url} type="url" disabled={loading}>
       <label>Name</label>
       <input bind:value={name} type="text" disabled={loading}>
+      <label>
+        <input type="checkbox" bind:checked={fetchIcons}>
+        Fetch icon automaticly <br><i>Icons are fetched from besticon.megaworld.space</i>
+      </label>
       <button on:click={addElement} disabled={loading}>OK</button>
     </div>
   {/if}
@@ -19,10 +23,11 @@
 let url
 let name
 let loading
+let fetchIcons = true
 let visible = false
 
 import { createEventDispatcher } from 'svelte'
-import { urlToDataUrl, checkDark } from '../img-converter.js'
+import { urlToDataUrl, checkDark, getLetterIcon } from '../img-converter.js'
 import { fly } from 'svelte/transition'
 
 const dispatch = createEventDispatcher()
@@ -39,31 +44,50 @@ async function addElement() {
     if (Array.isArray(item.bookmarks)) newArray = item.bookmarks
     else newArray = []
     url = new URL(url)
-    loading = true;
-    urlToDataUrl(`https://besticon.megaworld.space/icon?url=${url.hostname}&size=16..32..144`, imgDataUrl => {
-      checkDark(imgDataUrl, darkHandle)
+    loading = true
+    if (fetchIcons) {
+      urlToDataUrl(`https://besticon.megaworld.space/icon?url=${url.hostname}&size=16..32..144`, imgDataUrl => {
+        checkDark(imgDataUrl, darkHandle)
 
-      function darkHandle(isDark) {
-        newArray.push({
-          name: name,
-          url: url.href,
-          imgDataUrl: imgDataUrl,
-          dark: isDark
-        })
+        function darkHandle(isDark) {
+          newArray.push({
+            name: name,
+            url: url.href,
+            imgDataUrl: imgDataUrl,
+            dark: isDark
+          })
 
-        browser.storage.local.set({
-          bookmarks: newArray
-        })
+          browser.storage.local.set({
+            bookmarks: newArray
+          })
 
-        dispatch('add', {
-          newBookmarks: newArray
-        })
-        loading = false
-        name = undefined
-        url = undefined
-      } 
-    })
+          dispatch('add', {
+            newBookmarks: newArray
+          })
+          loading = false
+          name = undefined
+          url = undefined
+        } 
+      })
+    } else {
+      newArray.push({
+        name: name,
+        url: url.href,
+        imgDataUrl: getLetterIcon(url.hostname.charAt(0).toUpperCase()),
+        dark: false
+      })
 
+      browser.storage.local.set({
+        bookmarks: newArray
+      })
+
+      dispatch('add', {
+        newBookmarks: newArray
+      })
+      loading = false
+      name = undefined
+      url = undefined
+    }
   })
 }
 </script>
